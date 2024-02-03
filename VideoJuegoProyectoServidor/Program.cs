@@ -64,21 +64,41 @@ namespace VideoJuegoProyectoServidor
                 Console.WriteLine($"Mensaje recibido: {message}");
 
                     // Valida que el mensaje sea iniciar juego
-                    if (message == "juego")
+                    if (message.ToLower() == "iniciar juego")
                     {
 
                     // Envía una actualización de estado al cliente
-                    string response = $"\u001b[36mSe Recibio el Mensaje.\u001b[0m";
+                    string response = $"\u001b[36mSe inicio el juego.\u001b[0m";
                     byte[] responseBuffer = Encoding.UTF8.GetBytes(response);
                     await webSocket.SendAsync(new ArraySegment<byte>(responseBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
 
-                    // ejecuta el ascensor
+                    // Envía una actualización de estado al cliente
+                    response = $"\u001b[36mMundos Disponibles: Jimwestt y Kethan. Escoja uno:\u001b[0m";
+                    responseBuffer = Encoding.UTF8.GetBytes(response);
+                    await webSocket.SendAsync(new ArraySegment<byte>(responseBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
 
-                }
-                    else
+
+                    }
+                    else if(message.ToLower() == "jimwestt")
                     {
-                        // Si el piso solicitado no es válido, envía un mensaje de error al cliente
-                        string errorMessage = "\u001b[31mEl piso especificado no es válido.\u001b[0m";
+
+                    string response = $"\u001b[36mSe ha elegido Jimwestt.\u001b[0m";
+                    byte[] responseBuffer = Encoding.UTF8.GetBytes(response);
+                    await webSocket.SendAsync(new ArraySegment<byte>(responseBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
+
+                    }
+                    else if (message.ToLower() == "kethan")
+                    {
+
+                    string response = $"\u001b[36mSe ha elegido Kethan.\u001b[0m";
+                    byte[] responseBuffer = Encoding.UTF8.GetBytes(response);
+                    await webSocket.SendAsync(new ArraySegment<byte>(responseBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
+
+                    }
+                else
+                    {
+                        // Si lo escrito no es válido, envía un mensaje de error al cliente
+                        string errorMessage = "\u001b[31mLo que escribiste no es valido.\u001b[0m";
                         byte[] errorBuffer = Encoding.UTF8.GetBytes(errorMessage);
                         await webSocket.SendAsync(new ArraySegment<byte>(errorBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
                     }
