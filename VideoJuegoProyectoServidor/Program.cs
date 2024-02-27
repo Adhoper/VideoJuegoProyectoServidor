@@ -14,42 +14,45 @@ namespace VideoJuegoProyectoServidor
         static async Task Main(string[] args)
         {
             var httpListener = new HttpListener();
-            
+
             httpListener.Prefixes.Add("http://localhost:1600/");
 
             httpListener.Start();
 
             Console.WriteLine("Se ha iniciado el servidor");
 
-
-            while (true)
+            try
             {
-                // Espera una solicitud HTTP entrante
-                var context = await httpListener.GetContextAsync();
-
-                // Verifica si la solicitud es una solicitud WebSocket
-                if (context.Request.IsWebSocketRequest)
+                while (true)
                 {
-                    // Acepta la conexión WebSocket
-                    var webSocketContext = await context.AcceptWebSocketAsync(null);
+                    // Espera una solicitud HTTP entrante
+                    var context = await httpListener.GetContextAsync();
 
-                    // Maneja la conexión WebSocket de forma asincrónica
-                    await HandleWebSocketAsync(webSocketContext.WebSocket);
-                }
-                else
-                {
-                    // Rechaza las solicitudes que no sean WebSocket
-                    context.Response.StatusCode = 400;
-                    context.Response.Close();
+                    // Verifica si la solicitud es una solicitud WebSocket
+                    if (context.Request.IsWebSocketRequest)
+                    {
+                        // Acepta la conexión WebSocket
+                        var webSocketContext = await context.AcceptWebSocketAsync(null);
+
+                        // Maneja la conexión WebSocket de forma asincrónica
+                        await HandleWebSocketAsync(webSocketContext.WebSocket);
+                    }
+                    else
+                    {
+                        // Rechaza las solicitudes que no sean WebSocket
+                        context.Response.StatusCode = 400;
+                        context.Response.Close();
+                    }
                 }
             }
-
-
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Se ha producido una excepción con la solicitud HTTP entrante: {ex.Message}");
+            }
         }
 
         static async Task HandleWebSocketAsync(WebSocket webSocket)
         {
-
             // Buffer para recibir mensajes WebSocket
             byte[] buffer = new byte[1024];
 
@@ -63,10 +66,9 @@ namespace VideoJuegoProyectoServidor
                 string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 Console.WriteLine($"Mensaje recibido: {message}");
 
-                    // Valida que el mensaje sea iniciar juego
-                    if (message.ToLower() == "iniciar juego")
-                    {
-
+                // Valida que el mensaje sea iniciar juego
+                if (message.ToLower() == "iniciar juego")
+                {
                     // Envía una actualización de estado al cliente
                     string response = $"\u001b[36mSe inicio el juego.\u001b[0m";
                     byte[] responseBuffer = Encoding.UTF8.GetBytes(response);
@@ -76,33 +78,26 @@ namespace VideoJuegoProyectoServidor
                     response = $"\u001b[36mMundos Disponibles: Jimwestt y Kethan. Escoja uno:\u001b[0m";
                     responseBuffer = Encoding.UTF8.GetBytes(response);
                     await webSocket.SendAsync(new ArraySegment<byte>(responseBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
-
-
-                    }
-                    else if(message.ToLower() == "jimwestt")
-                    {
-
+                }
+                else if (message.ToLower() == "jimwestt")
+                {
                     string response = $"\u001b[36mSe ha elegido Jimwestt.\u001b[0m";
                     byte[] responseBuffer = Encoding.UTF8.GetBytes(response);
                     await webSocket.SendAsync(new ArraySegment<byte>(responseBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
-
-                    }
-                    else if (message.ToLower() == "kethan")
-                    {
-
+                }
+                else if (message.ToLower() == "kethan")
+                {
                     string response = $"\u001b[36mSe ha elegido Kethan.\u001b[0m";
                     byte[] responseBuffer = Encoding.UTF8.GetBytes(response);
                     await webSocket.SendAsync(new ArraySegment<byte>(responseBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
-
-                    }
+                }
                 else
-                    {
-                        // Si lo escrito no es válido, envía un mensaje de error al cliente
-                        string errorMessage = "\u001b[31mLo que escribiste no es valido.\u001b[0m";
-                        byte[] errorBuffer = Encoding.UTF8.GetBytes(errorMessage);
-                        await webSocket.SendAsync(new ArraySegment<byte>(errorBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
-                    }
-                
+                {
+                    // Si lo escrito no es válido, envía un mensaje de error al cliente
+                    string errorMessage = "\u001b[31mLo que escribiste no es valido.\u001b[0m";
+                    byte[] errorBuffer = Encoding.UTF8.GetBytes(errorMessage);
+                    await webSocket.SendAsync(new ArraySegment<byte>(errorBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                }
 
                 // Recibe el siguiente mensaje del cliente
                 buffer = new byte[1024];
@@ -113,4 +108,5 @@ namespace VideoJuegoProyectoServidor
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
         }
     }
+
 }
