@@ -35,6 +35,7 @@ namespace VideoJuegoProyectoServidor
                         var webSocketContext = await context.AcceptWebSocketAsync(null);
 
                         // Maneja la conexión WebSocket de forma asincrónica
+                        // Se aplica la recursividad ya que este se llama asi misma luego de enviar la respuesta al cliente.
                         await HandleWebSocketAsync(webSocketContext.WebSocket);
                     }
                     else
